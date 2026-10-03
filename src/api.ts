@@ -1,9 +1,11 @@
 import type { MedalClip } from "./types";
 
+const hostnames = ["medal.tv", "bronze.nexpid.workers.dev", "m.nexpid.xyz"];
+
 export const clipIdRegex = /^\/games\/([^/]+\/clips\/[^/]+)\/?$/i;
 export function parseClipId(url: string) {
 	const parsed = URL.parse(url);
-	return parsed?.hostname === "medal.tv"
+	return parsed && hostnames.includes(parsed?.hostname)
 		? parsed?.pathname.match(clipIdRegex)?.[1]
 		: undefined;
 }
