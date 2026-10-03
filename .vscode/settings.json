@@ -1,5 +1,20 @@
 {
 	"files.associations": {
 		"wrangler.json": "jsonc"
+	},
+	"editor.codeActionsOnSave": {
+		"source.fixAll.biome": "always"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
 	}
 }
