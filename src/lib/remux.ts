@@ -3,7 +3,7 @@ import constants from "../constants";
 import type { MedalClip } from "../types";
 
 const linkMatcher = /^https?:\/\/.+$/gm,
-	hostnameMatcher = /^|\.medal\.tv$/;
+	hostnameMatcher = /(^|\.)medal\.tv$/;
 function matchLinks(text: string) {
 	return (
 		text.match(linkMatcher)?.filter((url) => {
