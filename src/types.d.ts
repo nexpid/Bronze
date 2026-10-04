@@ -4,6 +4,7 @@ export interface MedalClip {
 	contentShareUrl: string;
 	contentUploadedAt: number;
 	contentUrl: string;
+	contentUrlHls: string;
 	thumbnailUrl: string;
 	views: number;
 	sourceWidth: number;
@@ -27,4 +28,5 @@ export interface MedalClip {
 		thumbnail: string;
 		userName: string;
 	};
+	videoLengthSeconds: number;
 }

@@ -1,10 +1,12 @@
 export default {
 	app: {
-		cacheTtl: 600,
-		// https://github.com/FxEmbed/FxEmbed/blob/main/src/worker.ts#L94-L95
+		// https://github.com/FxEmbed/FxEmbed/blob/e035b0e28bb417b67cc63759647d540ae03af6c6/src/worker.ts#L94-L95
 		userAgentMatcher:
 			/(discordbot|telegrambot|facebook|whatsapp|firefox\/92|vkshare|revoltchat|preview|iframely)/gi,
 		githubUrl: "http://github.com/nexpid/Bronze",
+		cacheTtl: 10 * 60,
+		videoCacheTtl: 4 * 60 * 60,
+		maxObjectSize: 100 * 1024 * 1024,
 	},
 	domains: {
 		raw: ["d.fxmedal.top", "raw.fxmedal.top"],
@@ -17,11 +19,14 @@ export default {
 			string,
 			[emojiId: number, color: number]
 		>,
+		maxClipDuration: 3 * 60,
 		clip: (clip: string) => `https://medal.tv/games/${clip}`,
 		category: (category: string) =>
 			`https://medal.tv/games/${encodeURIComponent(category)}`,
 		subgame: (category: string, subgame: string) =>
 			`https://medal.tv/games/${encodeURIComponent(category)}/experiences/${encodeURIComponent(subgame)}`,
 		user: (user: string) => `https://medal.tv/u/${encodeURIComponent(user)}`,
+		hls: (id: string, playlist: string, bebit: string) =>
+			`https://medal.tv/api/hls/${encodeURIComponent(id)}/${encodeURIComponent(playlist)}?bebit=${encodeURIComponent(bebit)}`,
 	},
 };

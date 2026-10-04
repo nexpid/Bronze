@@ -3,11 +3,14 @@ import {
 	ComponentType,
 	SeparatorSpacingSize,
 } from "discord-api-types/v10";
-import constants from "./constants";
-import type { MedalClip } from "./types";
-import { convertEmojiName, escapeText } from "./utils";
+import constants from "../constants";
+import type { MedalClip } from "../types";
+import { convertEmojiName, escapeText } from "../utils";
 
-export function makeDiscordEmbed(clip: MedalClip): APIMessageTopLevelComponent {
+export function makeDiscordEmbed(
+	clip: MedalClip,
+	videoUrl: string,
+): APIMessageTopLevelComponent {
 	const emoji = constants.medal.emoji[clip.category.slug];
 	const emojiName = convertEmojiName(clip.category.slug);
 	const subgameLink = clip.subgame
@@ -22,7 +25,7 @@ export function makeDiscordEmbed(clip: MedalClip): APIMessageTopLevelComponent {
 		components: [
 			{
 				type: ComponentType.TextDisplay,
-				content: `${emoji?.[0] ? `<:${emojiName}:${emoji[0]}>` : constants.medal.defaultEmoji} ${clip.subgame ? `[**${escapeText(clip.subgame.name)}**](${subgameLink})` : `[**${escapeText(clip.category.categoryName)}**](${constants.medal.category(clip.category.slug)})`} by [**${escapeText(clip.poster.displayName)}**](${constants.medal.user(clip.poster.userName)})`,
+				content: `${emoji?.[0] ? `<:${emojiName}:${emoji[0]}>` : constants.medal.defaultEmoji} ${clip.subgame ? `[**${escapeText(clip.subgame.name)}**](${subgameLink})` : `[**${escapeText(clip.category.categoryName)}**](${constants.medal.category(clip.category.slug)})`}  •  By [**${escapeText(clip.poster.displayName)}**](${constants.medal.user(clip.poster.userName)})`,
 			},
 			{
 				type: ComponentType.TextDisplay,
@@ -33,7 +36,7 @@ export function makeDiscordEmbed(clip: MedalClip): APIMessageTopLevelComponent {
 				items: [
 					{
 						media: {
-							url: clip.contentUrl,
+							url: videoUrl,
 						},
 					},
 				],

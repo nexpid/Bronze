@@ -1,8 +1,8 @@
-import constants from "./constants";
-import type { MedalClip } from "./types";
+import constants from "../constants";
+import type { MedalClip } from "../types";
 
-export function parseClipId(path: string) {
-	const [gamesConstant, gameId, clipsConstant, rawClipId, ...args] = path
+export function parseClipId(pathname: string) {
+	const [gamesConstant, gameId, clipsConstant, rawClipId, ...args] = pathname
 		.slice(1)
 		.split("/");
 	if (
@@ -23,7 +23,6 @@ const clipDataRegex = /{\\"clip\\":({.+?}),\\"profileColor/;
 export async function getClipInfo(clipId: string) {
 	const res = await fetch(constants.medal.clip(clipId), {
 		cf: {
-			cacheKey: clipId,
 			cacheTtl: constants.app.cacheTtl,
 		},
 		headers: {

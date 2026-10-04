@@ -6,6 +6,7 @@ import {
 	type RESTPostAPIApplicationEmojiResult,
 	Routes,
 } from "discord-api-types/v10";
+import icojs from "icojs";
 import sharp from "sharp";
 import { convertEmojiName } from "../src/utils";
 
@@ -29,8 +30,25 @@ function writeData() {
 	clearTimeout(writeTimeout);
 	writeTimeout = setTimeout(
 		() => writeFile(dataPath, JSON.stringify(emojiData)),
-		100,
+		5e3,
 	);
+}
+
+async function parseImage(image: ArrayBuffer) {
+	// is ICO?
+	const header = Buffer.from(image.slice(0, 2));
+	if (header.at(0) === 0 && header.at(1) === 0) {
+		const images = await icojs.decodeIco(image);
+		const icon = images.reduce(
+			(max, img) => (img.width > max.width ? img : max),
+			images[0],
+		);
+		if (!icon) throw new Error("No ico available!");
+
+		return icon.buffer;
+	} else {
+		return image;
+	}
 }
 
 const SAT_WEIGHT = 4;
@@ -102,9 +120,10 @@ for (let i = 0; i < 11; i++) {
 		if (!game.icon) continue;
 
 		try {
-			const image = await fetch(game.icon, { cache: "force-cache" }).then((x) =>
-				x.arrayBuffer(),
-			);
+			const image = await fetch(game.icon, { cache: "force-cache" })
+				.then((x) => x.arrayBuffer())
+				.then((x) => parseImage(x));
+
 			const color = await computeCommonColor(image).catch(console.warn);
 			if (typeof color !== "number") {
 				console.error(
@@ -142,3 +161,4 @@ for (let i = 0; i < 11; i++) {
 }
 
 writeData();
+console.log("done");
