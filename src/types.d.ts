@@ -6,6 +6,8 @@ export interface MedalClip {
 	contentUrl: string;
 	thumbnailUrl: string;
 	views: number;
+	sourceWidth: number;
+	sourceHeight: number;
 	category: {
 		categoryName: string;
 		icon: string;
@@ -15,6 +17,10 @@ export interface MedalClip {
 		id: string;
 		name: string;
 		iconUrl: string;
+		joinUrl: string;
+		metadata: {
+			joinUrl?: string;
+		};
 	};
 	poster: {
 		displayName: string;

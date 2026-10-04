@@ -1,13 +1,30 @@
 import type { MedalClip } from "./types";
 
-const hostnames = ["medal.tv", "bronze.nexpid.workers.dev", "m.nexpid.xyz"];
+export const rawHostnames = ["rm.nexpid.xyz"];
+export const medalHostnames = [
+	"medal.tv",
+	"bronze.nexpid.workers.dev",
+	"m.nexpid.xyz",
+	...rawHostnames,
+];
+export const cacheTtl = 600;
 
-export const clipIdRegex = /^\/games\/([^/]+\/clips\/[^/]+)\/?$/i;
-export function parseClipId(url: string) {
-	const parsed = URL.parse(url);
-	return parsed && hostnames.includes(parsed?.hostname)
-		? parsed?.pathname.match(clipIdRegex)?.[1]
-		: undefined;
+export function parseClipId(path: string) {
+	const [gamesConstant, gameId, clipsConstant, rawClipId, ...args] = path
+		.slice(1)
+		.split("/");
+	if (
+		gamesConstant !== "games" ||
+		!gameId ||
+		clipsConstant !== "clips" ||
+		!rawClipId
+	)
+		return;
+
+	return {
+		clipId: [gameId, clipsConstant, rawClipId].join("/"),
+		raw: args[0] === "raw",
+	};
 }
 
 const clipDataRegex = /{\\"clip\\":({.+?}),\\"profileColor/;
@@ -15,7 +32,7 @@ export async function getClipInfo(clipId: string) {
 	const res = await fetch(`https://medal.tv/games/${clipId}`, {
 		cf: {
 			cacheKey: clipId,
-			cacheTtl: 300,
+			cacheTtl,
 		},
 		headers: {
 			accept: "text/html",

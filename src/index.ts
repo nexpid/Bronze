@@ -22,13 +22,22 @@ import {
 	MessageFlags,
 } from "discord-api-types/v10";
 import { verifyKey } from "discord-interactions";
-import { clipIdRegex, getClipInfo, parseClipId } from "./api";
+import {
+	cacheTtl,
+	getClipInfo,
+	medalHostnames,
+	parseClipId,
+	rawHostnames,
+} from "./api";
 import { makeDiscordEmbed } from "./embed";
+import { videoOpenGraphTemplate, websiteTemplate } from "./templates";
 import { deferReply } from "./utils";
 
-const GH_URL = "http://github.com/nexpid/Bronze";
+// https://github.com/FxEmbed/FxEmbed/blob/main/src/worker.ts#L94-L95
+const embeddingClientRegex =
+	/(discordbot|telegrambot|facebook|whatsapp|firefox\/92|vkshare|revoltchat|preview|iframely)/gi;
 
-const textDecoder = new TextDecoder();
+const GH_URL = "http://github.com/nexpid/Bronze";
 
 const make: (response: APIInteractionResponse) => Response = Response.json;
 const makeMessage = (data: APIInteractionResponseCallbackData) =>
@@ -37,6 +46,7 @@ const makeMessage = (data: APIInteractionResponseCallbackData) =>
 		data,
 	});
 
+const textDecoder = new TextDecoder();
 export default {
 	async fetch(req, env, ctx): Promise<Response> {
 		const url = new URL(req.url);
@@ -45,31 +55,31 @@ export default {
 			realUrl.hostname = "medal.tv";
 			realUrl.protocol = "https";
 
+			const rawHost = rawHostnames.includes(url.hostname);
 			const userAgent = req.headers.get("user-agent");
-			console.log(userAgent);
-			if (!userAgent?.includes("https://discordapp.com"))
+			if (!userAgent?.match(embeddingClientRegex))
 				return Response.redirect(realUrl.toString());
 
-			const clipId = url.pathname.match(clipIdRegex)?.[1];
-			if (!clipId) return Response.redirect(realUrl.toString());
+			const parsed = parseClipId(url.pathname);
+			if (!parsed) return Response.redirect(realUrl.toString());
 
-			const clip = await getClipInfo(clipId);
-			console.log(clip);
+			const clip = await getClipInfo(parsed.clipId);
 			if (!clip) return Response.redirect(realUrl.toString());
 
-			const component = makeDiscordEmbed(clip);
-			return new Response(
-				`<script id="discord:component-embed" type="application/json">${JSON.stringify(
-					{
-						component,
-					},
-				)}</script>`,
-				{
+			if (rawHost || parsed.raw)
+				return new Response(videoOpenGraphTemplate(clip), {
 					headers: {
-						"Content-Type": "text/html",
+						"content-type": "text/html",
+						"cache-control": `public, max-age=${cacheTtl}`,
 					},
+				});
+
+			return new Response(websiteTemplate(makeDiscordEmbed(clip)), {
+				headers: {
+					"content-type": "text/html",
+					"cache-control": `public, max-age=${cacheTtl}`,
 				},
-			);
+			});
 		} else if (req.method !== "POST" || url.pathname !== "/api/interaction")
 			return Response.redirect(GH_URL);
 
@@ -118,8 +128,12 @@ export default {
 						flags: MessageFlags.Ephemeral,
 					});
 
-				const clipId = parseClipId(url.value);
-				if (!clipId)
+				const parsedUrl = URL.parse(url.value);
+				const parsed =
+					parsedUrl &&
+					medalHostnames.includes(parsedUrl.hostname) &&
+					parseClipId(parsedUrl.pathname);
+				if (!parsed)
 					return makeMessage({
 						content:
 							"You must pass a valid [**Medal.tv**](<https://medal.tv/>) clip URL to embed!",
@@ -129,7 +143,7 @@ export default {
 				const { promise, edit } = await deferReply(interaction);
 				ctx.waitUntil(promise);
 
-				const clip = await getClipInfo(clipId);
+				const clip = await getClipInfo(parsed.clipId);
 				if (!clip)
 					return await edit({
 						content: `Failed to load the [Medal.tv clip](${url.value})! Is it public?`,

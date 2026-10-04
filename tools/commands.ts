@@ -13,16 +13,6 @@ if (!token) throw new Error("Please set a DISCORD_TOKEN variable in .env");
 const commands = [
 	{
 		type: ApplicationCommandType.ChatInput,
-		name: "pingus",
-		description: "Pingus!",
-		contexts: [
-			InteractionContextType.BotDM,
-			InteractionContextType.Guild,
-			InteractionContextType.PrivateChannel,
-		],
-	},
-	{
-		type: ApplicationCommandType.ChatInput,
 		name: "medal",
 		description: "Embed a Medal.tv clip",
 		options: [

@@ -65,3 +65,5 @@ export function convertEmojiName(slug: string) {
 		.slice(0, 30)
 		.padStart(2, "g")}`;
 }
+
+export const escapeText = (text: string) => text.replace(/_~\|\*\[\]/g, "\\$1");

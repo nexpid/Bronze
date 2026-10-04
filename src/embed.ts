@@ -5,8 +5,7 @@ import {
 } from "discord-api-types/v10";
 import emojis from "./emoji.json";
 import type { MedalClip } from "./types";
-
-const escapeText = (text: string) => text.replace(/_~\|\*\[\]/g, "\\$1");
+import { convertEmojiName, escapeText } from "./utils";
 
 const emojiData = emojis as unknown as Record<
 	string,
@@ -14,10 +13,12 @@ const emojiData = emojis as unknown as Record<
 >;
 export function makeDiscordEmbed(clip: MedalClip): APIMessageTopLevelComponent {
 	const emoji = emojiData[clip.category.slug];
-	const emojiName = `${clip.category.slug
-		.replace(/-/g, "_")
-		.replace(/[^a-z0-9_]/gi, "")
-		?.slice(0, 30)}`;
+	const emojiName = convertEmojiName(clip.category.slug);
+	const subgameLink = clip.subgame
+		? (clip.subgame.joinUrl ??
+			clip.subgame.metadata.joinUrl ??
+			`https://medal.tv/games/${encodeURIComponent(clip.category.slug)}/experiences/${encodeURIComponent(clip.subgame.id)}`)
+		: undefined;
 
 	return {
 		type: ComponentType.Container,
@@ -25,11 +26,11 @@ export function makeDiscordEmbed(clip: MedalClip): APIMessageTopLevelComponent {
 		components: [
 			{
 				type: ComponentType.TextDisplay,
-				content: `${emoji?.[0] ? `<:${emojiName}:${emoji[0]}>` : "🎮"} ${clip.subgame ? `[**${escapeText(clip.subgame.name)}**](https://medal.tv/games/${encodeURIComponent(clip.category.slug)}/experiences/${encodeURIComponent(clip.subgame.id)})` : `[**${escapeText(clip.category.categoryName)}**](https://medal.tv/games/${encodeURIComponent(clip.category.slug)})`} by [**${escapeText(clip.poster.displayName)}**](https://medal.tv/u/${encodeURIComponent(clip.poster.userName)})`,
+				content: `${emoji?.[0] ? `<:${emojiName}:${emoji[0]}>` : "🎮"} ${clip.subgame ? `[**${escapeText(clip.subgame.name)}**](${subgameLink})` : `[**${escapeText(clip.category.categoryName)}**](https://medal.tv/games/${encodeURIComponent(clip.category.slug)})`} by [**${escapeText(clip.poster.displayName)}**](https://medal.tv/u/${encodeURIComponent(clip.poster.userName)})`,
 			},
 			{
 				type: ComponentType.TextDisplay,
-				content: `# ${clip.contentTitle}`,
+				content: `# [${escapeText(clip.contentTitle)}](${clip.contentShareUrl})`,
 			},
 			{
 				type: ComponentType.MediaGallery,
