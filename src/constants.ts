@@ -6,7 +6,7 @@ export default {
 		githubUrl: "http://github.com/nexpid/Bronze",
 		cacheTtl: 10 * 60,
 		videoCacheTtl: 4 * 60 * 60,
-		maxObjectSize: 100 * 1024 * 1024,
+		maxObjectSize: 50 * 1024 * 1024,
 	},
 	domains: {
 		raw: ["d.fxmedal.top", "raw.fxmedal.top"],
@@ -19,7 +19,7 @@ export default {
 			string,
 			[emojiId: number, color: number]
 		>,
-		maxClipDuration: 3 * 60,
+		maxClipDuration: 2 * 60,
 		clip: (clip: string) => `https://medal.tv/games/${clip}`,
 		category: (category: string) =>
 			`https://medal.tv/games/${encodeURIComponent(category)}`,
