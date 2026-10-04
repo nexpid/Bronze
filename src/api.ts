@@ -1,13 +1,5 @@
+import constants from "./constants";
 import type { MedalClip } from "./types";
-
-export const rawHostnames = ["rm.nexpid.xyz"];
-export const medalHostnames = [
-	"medal.tv",
-	"bronze.nexpid.workers.dev",
-	"m.nexpid.xyz",
-	...rawHostnames,
-];
-export const cacheTtl = 600;
 
 export function parseClipId(path: string) {
 	const [gamesConstant, gameId, clipsConstant, rawClipId, ...args] = path
@@ -29,10 +21,10 @@ export function parseClipId(path: string) {
 
 const clipDataRegex = /{\\"clip\\":({.+?}),\\"profileColor/;
 export async function getClipInfo(clipId: string) {
-	const res = await fetch(`https://medal.tv/games/${clipId}`, {
+	const res = await fetch(constants.medal.clip(clipId), {
 		cf: {
 			cacheKey: clipId,
-			cacheTtl,
+			cacheTtl: constants.app.cacheTtl,
 		},
 		headers: {
 			accept: "text/html",

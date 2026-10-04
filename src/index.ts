@@ -22,22 +22,11 @@ import {
 	MessageFlags,
 } from "discord-api-types/v10";
 import { verifyKey } from "discord-interactions";
-import {
-	cacheTtl,
-	getClipInfo,
-	medalHostnames,
-	parseClipId,
-	rawHostnames,
-} from "./api";
+import { getClipInfo, parseClipId } from "./api";
+import constants from "./constants";
 import { makeDiscordEmbed } from "./embed";
 import { videoOpenGraphTemplate, websiteTemplate } from "./templates";
 import { deferReply } from "./utils";
-
-// https://github.com/FxEmbed/FxEmbed/blob/main/src/worker.ts#L94-L95
-const embeddingClientRegex =
-	/(discordbot|telegrambot|facebook|whatsapp|firefox\/92|vkshare|revoltchat|preview|iframely)/gi;
-
-const GH_URL = "http://github.com/nexpid/Bronze";
 
 const make: (response: APIInteractionResponse) => Response = Response.json;
 const makeMessage = (data: APIInteractionResponseCallbackData) =>
@@ -54,10 +43,11 @@ export default {
 			const realUrl = new URL(url);
 			realUrl.hostname = "medal.tv";
 			realUrl.protocol = "https";
+			realUrl.searchParams.delete("invite");
 
-			const rawHost = rawHostnames.includes(url.hostname);
+			const rawHost = constants.domains.raw.includes(url.hostname);
 			const userAgent = req.headers.get("user-agent");
-			if (!userAgent?.match(embeddingClientRegex))
+			if (!userAgent?.match(constants.app.userAgentMatcher))
 				return Response.redirect(realUrl.toString());
 
 			const parsed = parseClipId(url.pathname);
@@ -70,18 +60,18 @@ export default {
 				return new Response(videoOpenGraphTemplate(clip), {
 					headers: {
 						"content-type": "text/html",
-						"cache-control": `public, max-age=${cacheTtl}`,
+						"cache-control": `public, max-age=${constants.app.cacheTtl}`,
 					},
 				});
 
 			return new Response(websiteTemplate(makeDiscordEmbed(clip)), {
 				headers: {
 					"content-type": "text/html",
-					"cache-control": `public, max-age=${cacheTtl}`,
+					"cache-control": `public, max-age=${constants.app.cacheTtl}`,
 				},
 			});
 		} else if (req.method !== "POST" || url.pathname !== "/api/interaction")
-			return Response.redirect(GH_URL);
+			return Response.redirect(constants.app.githubUrl);
 
 		const signature = req.headers.get("X-Signature-Ed25519");
 		const timestamp = req.headers.get("X-Signature-Timestamp");
@@ -115,11 +105,6 @@ export default {
 			});
 
 		switch (interaction.data.name) {
-			case "pingus": {
-				return makeMessage({
-					content: "Pingus!",
-				});
-			}
 			case "medal": {
 				const url = interaction.data.options?.find((x) => x.name === "url");
 				if (url?.type !== ApplicationCommandOptionType.String)
@@ -129,10 +114,11 @@ export default {
 					});
 
 				const parsedUrl = URL.parse(url.value);
-				const parsed =
+				const isValid =
 					parsedUrl &&
-					medalHostnames.includes(parsedUrl.hostname) &&
-					parseClipId(parsedUrl.pathname);
+					(constants.domains.base.includes(parsedUrl.hostname) ||
+						constants.domains.raw.includes(parsedUrl.hostname));
+				const parsed = isValid && parseClipId(parsedUrl.pathname);
 				if (!parsed)
 					return makeMessage({
 						content:
@@ -149,6 +135,7 @@ export default {
 						content: `Failed to load the [Medal.tv clip](${url.value})! Is it public?`,
 					});
 
+				// TODO reupload clip if raw is specified
 				const embed = makeDiscordEmbed(clip);
 				return await edit({
 					flags: MessageFlags.IsComponentsV2,

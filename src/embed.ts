@@ -3,30 +3,26 @@ import {
 	ComponentType,
 	SeparatorSpacingSize,
 } from "discord-api-types/v10";
-import emojis from "./emoji.json";
+import constants from "./constants";
 import type { MedalClip } from "./types";
 import { convertEmojiName, escapeText } from "./utils";
 
-const emojiData = emojis as unknown as Record<
-	string,
-	[emojiId: string, color: number]
->;
 export function makeDiscordEmbed(clip: MedalClip): APIMessageTopLevelComponent {
-	const emoji = emojiData[clip.category.slug];
+	const emoji = constants.medal.emoji[clip.category.slug];
 	const emojiName = convertEmojiName(clip.category.slug);
 	const subgameLink = clip.subgame
 		? (clip.subgame.joinUrl ??
 			clip.subgame.metadata.joinUrl ??
-			`https://medal.tv/games/${encodeURIComponent(clip.category.slug)}/experiences/${encodeURIComponent(clip.subgame.id)}`)
+			constants.medal.subgame(clip.category.slug, clip.subgame.id))
 		: undefined;
 
 	return {
 		type: ComponentType.Container,
-		accent_color: emoji?.[1] ?? 0xbff83e,
+		accent_color: emoji?.[1] ?? constants.medal.color,
 		components: [
 			{
 				type: ComponentType.TextDisplay,
-				content: `${emoji?.[0] ? `<:${emojiName}:${emoji[0]}>` : "🎮"} ${clip.subgame ? `[**${escapeText(clip.subgame.name)}**](${subgameLink})` : `[**${escapeText(clip.category.categoryName)}**](https://medal.tv/games/${encodeURIComponent(clip.category.slug)})`} by [**${escapeText(clip.poster.displayName)}**](https://medal.tv/u/${encodeURIComponent(clip.poster.userName)})`,
+				content: `${emoji?.[0] ? `<:${emojiName}:${emoji[0]}>` : constants.medal.defaultEmoji} ${clip.subgame ? `[**${escapeText(clip.subgame.name)}**](${subgameLink})` : `[**${escapeText(clip.category.categoryName)}**](${constants.medal.category(clip.category.slug)})`} by [**${escapeText(clip.poster.displayName)}**](${constants.medal.user(clip.poster.userName)})`,
 			},
 			{
 				type: ComponentType.TextDisplay,
