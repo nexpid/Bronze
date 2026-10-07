@@ -29,7 +29,7 @@ export function makeDiscordEmbed(
 			},
 			{
 				type: ComponentType.TextDisplay,
-				content: `# [${escapeText(clip.contentTitle)}](${clip.contentShareUrl})`,
+				content: `# ${escapeText(clip.contentTitle)}`,
 			},
 			{
 				type: ComponentType.MediaGallery,

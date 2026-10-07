@@ -1,7 +1,8 @@
 export interface MedalClip {
+	contentId: string;
 	contentTitle: string;
 	tags: string[];
-	contentShareUrl: string;
+	contentShareUrl?: string;
 	contentUploadedAt: number;
 	contentUrl: string;
 	contentUrlHls: string;

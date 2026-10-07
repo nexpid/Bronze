@@ -2,44 +2,39 @@ import constants from "../constants";
 import type { MedalClip } from "../types";
 
 export function parseClipId(pathname: string) {
-	const [gamesConstant, gameId, clipsConstant, rawClipId, ...args] = pathname
+	const [gamesConstant, gameId, clipsConstant, clipId, ...args] = pathname
 		.slice(1)
 		.split("/");
 	if (
 		gamesConstant !== "games" ||
 		!gameId ||
 		clipsConstant !== "clips" ||
-		!rawClipId
+		!clipId
 	)
 		return;
 
 	return {
-		clipId: [gameId, clipsConstant, rawClipId].join("/"),
+		clipId,
 		raw: args[0] === "raw",
 	};
 }
 
-const clipDataRegex = /{\\"clip\\":({.+?}),\\"profileColor/;
+// const clipDataRegex = /{\\"clip\\":({.+?}),\\"profileColor/;
 export async function getClipInfo(clipId: string) {
-	const res = await fetch(constants.medal.clip(clipId), {
+	const res = await fetch(constants.medal.apiClip(clipId), {
 		cf: {
 			cacheTtl: constants.app.cacheTtl,
 		},
 		headers: {
-			accept: "text/html",
+			accept: "application/json",
 		},
 	});
 	if (!res.ok) return;
 
-	const html = await res.text();
-	const rawClipData = html.match(clipDataRegex)?.[1];
+	const data = (await res.json().catch(() => undefined)) as
+		| MedalClip
+		| undefined;
+	if (!data?.contentId) return;
 
-	let clipData: MedalClip | undefined;
-	try {
-		clipData = JSON.parse(JSON.parse(`"${rawClipData}"`));
-	} catch {
-		return undefined;
-	}
-
-	return clipData;
+	return data;
 }

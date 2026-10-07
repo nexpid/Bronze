@@ -20,7 +20,7 @@ export default {
 			[emojiId: number, color: number]
 		>,
 		maxClipDuration: 2 * 60,
-		clip: (clip: string) => `https://medal.tv/games/${clip}`,
+		apiClip: (clip: string) => `https://medal.tv/api/content/${encodeURIComponent(clip)}`,
 		category: (category: string) =>
 			`https://medal.tv/games/${encodeURIComponent(category)}`,
 		subgame: (category: string, subgame: string) =>
