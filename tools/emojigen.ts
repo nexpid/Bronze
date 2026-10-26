@@ -103,7 +103,8 @@ async function computeCommonColor(image: ArrayBuffer) {
 		: null;
 }
 
-let uploaded = 0, kept = 0;
+let uploaded = 0,
+	kept = 0;
 const gamesPerPage = 100;
 for (let i = 0; i < 11; i++) {
 	console.log(`[page ${i + 1}] Fetching 100 games`);
@@ -150,10 +151,10 @@ for (let i = 0; i < 11; i++) {
 				})) as RESTPostAPIApplicationEmojiResult;
 				emojiData[game.slug] = [emoji.id, color];
 				console.log(`[page ${i + 1}] uploaded :${emojiName}:`);
-                uploaded++;
+				uploaded++;
 			} else {
 				emojiData[game.slug][1] = color;
-                kept++;
+				kept++;
 			}
 
 			writeData();
