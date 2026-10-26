@@ -11,18 +11,18 @@
 		"check": "biome check --write"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.15",
-		"@cloudflare/vitest-plugin": "^1.0.0",
+		"@biomejs/biome": "2.6.3",
+		"@cloudflare/vitest-plugin": "^1.4.8",
 		"@discordjs/rest": "^2.6.3",
-		"@types/node": "^26.6.4",
+		"@types/node": "^26.6.5",
 		"icojs": "^1.0.1",
 		"sharp": "^0.35.5",
 		"typescript": "^5.5.2",
-		"vitest": "~4.1.0",
-		"wrangler": "^4.147.0"
+		"vitest": "~5.0.5",
+		"wrangler": "^4.153.0"
 	},
 	"dependencies": {
-		"discord-api-types": "^0.38.56",
+		"discord-api-types": "^0.38.57",
 		"discord-interactions": "^4.4.0",
 		"mux.js": "^6.3.0"
 	}
