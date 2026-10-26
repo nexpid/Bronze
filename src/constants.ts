@@ -1,8 +1,5 @@
 export default {
 	app: {
-		// https://github.com/FxEmbed/FxEmbed/blob/e035b0e28bb417b67cc63759647d540ae03af6c6/src/worker.ts#L94-L95
-		userAgentMatcher:
-			/(discordbot|telegrambot|facebook|whatsapp|firefox\/92|vkshare|revoltchat|preview|iframely)/gi,
 		githubUrl: "http://github.com/nexpid/Bronze",
 		cacheTtl: 20 * 60,
 		videoCacheTtl: 24 * 60 * 60,
