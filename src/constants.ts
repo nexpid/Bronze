@@ -4,8 +4,8 @@ export default {
 		userAgentMatcher:
 			/(discordbot|telegrambot|facebook|whatsapp|firefox\/92|vkshare|revoltchat|preview|iframely)/gi,
 		githubUrl: "http://github.com/nexpid/Bronze",
-		cacheTtl: 10 * 60,
-		videoCacheTtl: 4 * 60 * 60,
+		cacheTtl: 20 * 60,
+		videoCacheTtl: 24 * 60 * 60,
 		maxObjectSize: 50 * 1024 * 1024,
 	},
 	domains: {
@@ -20,7 +20,8 @@ export default {
 			[emojiId: number, color: number]
 		>,
 		maxClipDuration: 2 * 60,
-		apiClip: (clip: string) => `https://medal.tv/api/content/${encodeURIComponent(clip)}`,
+		apiClip: (clip: string) =>
+			`https://medal.tv/api/content/${encodeURIComponent(clip)}`,
 		category: (category: string) =>
 			`https://medal.tv/games/${encodeURIComponent(category)}`,
 		subgame: (category: string, subgame: string) =>

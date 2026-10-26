@@ -12,8 +12,8 @@ export function makeRoute(
 	handler: (
 		url: URL,
 		req: Request<unknown, IncomingRequestCfProperties<unknown>>,
-		env: Env,
 		ctx: ExecutionContext<unknown>,
+		env: Env,
 	) => Promise<Response>,
 ) {
 	return handler;
@@ -95,8 +95,36 @@ export async function sha256Hex(text: string) {
 		.join("");
 }
 
+export function getCanonRedirect(url: string | URL) {
+	const canon = new URL(url);
+	canon.hostname = "medal.tv";
+	canon.protocol = "https";
+	canon.searchParams.delete("invite");
+	return canon.toString();
+}
+
+export function parseRangeHeader(rangeHeader: string | null, size: number) {
+	const matched = rangeHeader?.match(/^bytes=(\d*)-(\d*)$/);
+	if (!matched || (!matched[1] && !matched[2])) return;
+
+	let start: number, end: number;
+	if (!matched[1]) {
+		start = Math.max(0, size - Number(matched[2]));
+		end = size - 1;
+	} else {
+		start = Number(matched[1]);
+		end = matched[2] ? Math.min(Number(matched[2]), size - 1) : size - 1;
+	}
+	return start <= end && start < size ? { start, end } : undefined;
+}
+
+export interface ByteRange {
+	start: number;
+	end: number;
+}
+
 // R2Size has a cursed type
-export function parseRange(
+export function normalizeRange(
 	range: { suffix?: number; offset?: number; length?: number },
 	size: number,
 ) {

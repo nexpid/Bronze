@@ -2,6 +2,8 @@ import muxjs from "mux.js";
 import constants from "../constants";
 import type { MedalClip } from "../types";
 
+class TransmuxerError extends Error {}
+
 const linkMatcher = /^https?:\/\/.+$/gm,
 	hostnameMatcher = /(^|\.)medal\.tv$/;
 function matchLinks(text: string) {
@@ -19,7 +21,7 @@ async function fetchText(url: string) {
 	});
 	if (!res.ok) {
 		await res.body?.cancel();
-		throw new Error(`Failed to fetch playlist: ${res.status}`);
+		throw new TransmuxerError(`Failed to fetch playlist: status ${res.status}`);
 	}
 
 	return res.text();
@@ -31,7 +33,9 @@ async function fetchChunk(url: string, i: number) {
 	});
 	if (!res.ok) {
 		await res.body?.cancel();
-		throw new Error(`Failed to fetch chunk ${i}: ${res.status}`);
+		throw new TransmuxerError(
+			`Failed to fetch chunk ${i}: status ${res.status}`,
+		);
 	}
 
 	return new Uint8Array(await res.arrayBuffer());
@@ -41,10 +45,10 @@ const prefetchLimit = 4;
 export async function transmuxPlaylist(playlistUrl: string) {
 	const sourcePlaylistUrl = matchLinks(await fetchText(playlistUrl))[0];
 	if (!sourcePlaylistUrl)
-		throw new Error("Failed to find source playlist link");
+		throw new TransmuxerError("Failed to find source playlist link");
 
 	const chunks = matchLinks(await fetchText(sourcePlaylistUrl));
-	if (!chunks[0]) throw new Error("Failed to find first chunk");
+	if (!chunks[0]) throw new TransmuxerError("Failed to find first chunk");
 
 	const transmuxer = new muxjs.mp4.Transmuxer({
 		keepOriginalTimestamps: true,
@@ -119,7 +123,13 @@ export function makeProxyUrl(clip: MedalClip, base: URL) {
 }
 
 export function retrieveProxyUrl(url: URL) {
-	const id = decodeURIComponent(url.pathname.slice(1).split("/")[1]);
+	let id: string;
+	try {
+		id = decodeURIComponent(url.pathname.slice(1).split("/")[1] || "");
+	} catch (error) {
+		if (error instanceof URIError) return;
+		throw error;
+	}
 	if (!id) return;
 
 	return constants.medal.hls(

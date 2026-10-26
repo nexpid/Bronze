@@ -15,7 +15,7 @@ import { makeProxyUrl } from "../lib/remux";
 import { deferReply, makeMessage, makeRoute } from "../utils";
 
 const textDecoder = new TextDecoder();
-export default makeRoute(async (url, req, env, ctx) => {
+export default makeRoute(async (url, req, ctx, env) => {
 	const signature = req.headers.get("X-Signature-Ed25519");
 	const timestamp = req.headers.get("X-Signature-Timestamp");
 	if (!signature || !timestamp)

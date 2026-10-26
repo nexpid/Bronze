@@ -13,20 +13,21 @@
 
 import constants from "./constants";
 import * as routes from "./routes";
+import { getCanonRedirect } from "./utils";
 
 export default {
 	async fetch(req, env, ctx): Promise<Response> {
 		const url = new URL(req.url);
-		if (req.method === "GET") {
+		if (req.method === "HEAD" || req.method === "GET") {
 			if (url.pathname.startsWith("/games/"))
-				return await routes.embed(url, req, env, ctx);
+				return await routes.embed(url, req, ctx, env);
 			else if (url.pathname.startsWith("/proxy/"))
-				return await routes.proxy(url, req, env, ctx);
-		}
+				return await routes.proxy(url, req, ctx, env);
+		} else if (req.method === "POST" && url.pathname === "/api/interaction")
+			return await routes.interaction(url, req, ctx, env);
 
-		if (req.method !== "POST" || url.pathname !== "/api/interaction")
-			return Response.redirect(constants.app.githubUrl);
+		if (url.pathname === "/") return Response.redirect(constants.app.githubUrl);
 
-		return await routes.interaction(url, req, env, ctx);
+		return Response.redirect(getCanonRedirect(url));
 	},
 } satisfies ExportedHandler<Env>;
