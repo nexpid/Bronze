@@ -6,7 +6,9 @@ export const websiteTemplate = (
 	url: string,
 	component: APIMessageTopLevelComponent,
 ) =>
-	`<!DOCTYPE html><html><head><!-- ${constants.app.githubUrl} -->
+	`<!DOCTYPE html><html><head><!--
+	embed drawn by FxMedal / Bronze -> ${constants.app.githubUrl}
+-->
 <script id="discord:component-embed" type="application/json">${JSON.stringify({ component })}</script><meta http-equiv="refresh" content="0;url=${url}"/></head></html>`;
 
 // export const videoOpenGraphTemplate = (
